@@ -7,3 +7,4 @@ services:
 #    service_name:
 #        class: AppBundle\Directory\ClassName
 #        arguments: ["@another_service_name", "plain_value", "%parameter_name%"]
+  Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface: '@security.password_encoder'
