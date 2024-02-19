@@ -110,7 +110,17 @@ class TaskController extends AbstractController
     #[Route(path: '/tasks/{id}/delete', name: 'task_delete', methods: ['GET', 'POST', 'DELETE'])]
     public function deleteTaskAction(Task $task)
     {
-        /* Si l'auteur n'est pas le même, on empêche la modification */
+
+        /* --> Si l'utilisateur est admin et que l'auteur est anonyme, on peut supprimer */
+        if ($this->isGranted('ROLE_ADMIN') && $task->getUser()->getUsername() == 'anonymous') {
+            $this->em->remove($task);
+            $this->em->flush();
+
+            $this->addFlash('success', 'La tâche a bien été supprimée.');
+            return $this->redirectToRoute('task_list');
+        }
+
+        /* --> Si l'auteur n'est pas le même, on empêche la modification */
         if (!$this->isAuthor($task)) {
             $this->addFlash('error', 'Vous n\'êtes pas l\'auteur de cette tâche.');
             return $this->redirectToRoute('task_list');
