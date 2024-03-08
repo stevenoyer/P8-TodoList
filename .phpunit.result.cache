@@ -1,1 +1,1 @@
-{"version":1,"defects":[],"times":[]}
+{"version":1,"defects":{"App\\Tests\\Entity\\TaskEntity::testDefault":3,"App\\Tests\\Entity\\TaskEntity::testTaskEntity":4,"App\\Tests\\Entity\\UserEntity::testUserEntity":3,"App\\Tests\\Controller\\DefaultControllerTest::testIndexAction":4},"times":{"App\\Tests\\Entity\\TaskEntity::testDefault":0.003,"App\\Tests\\Entity\\TaskEntity::testTaskEntity":0.009,"App\\Tests\\Entity\\UserEntity::testUserEntity":0,"App\\Tests\\Controller\\DefaultControllerTest::testIndexAction":0.133}}

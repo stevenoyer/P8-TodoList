@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Task;
+use App\Entity\User;
 use App\Form\TaskType;
 use App\Repository\TaskRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -19,6 +20,19 @@ class TaskController extends AbstractController
     public function __construct(EntityManagerInterface $em)
     {
         $this->em = $em;
+    }
+
+    /**
+     * L'utilisateur est l'auteur ?
+     */
+    public function isAuthor(Task $task): bool
+    {
+        /* Si l'auteur n'est pas le même, on empêche la modification */
+        if ($task->getUser() != $this->getUser()) {
+            return false;
+        }
+
+        return true;
     }
 
     #[Route(path: '/tasks', name: 'task_list', methods: ['GET'])]
@@ -57,6 +71,12 @@ class TaskController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            /* Si l'auteur n'est pas le même, on empêche la modification */
+            if (!$this->isAuthor($task)) {
+                $this->addFlash('error', 'Vous n\'êtes pas l\'auteur de cette tâche.');
+                return $this->redirectToRoute('task_list');
+            }
+
             $this->em->flush();
 
             $this->addFlash('success', 'La tâche a bien été modifiée.');
@@ -73,6 +93,12 @@ class TaskController extends AbstractController
     #[Route(path: '/tasks/{id}/toggle', name: 'task_toggle', methods: ['GET', 'POST'])]
     public function toggleTaskAction(Task $task)
     {
+        /* Si l'auteur n'est pas le même, on empêche la modification */
+        if (!$this->isAuthor($task)) {
+            $this->addFlash('error', 'Vous n\'êtes pas l\'auteur de cette tâche.');
+            return $this->redirectToRoute('task_list');
+        }
+
         $task->toggle(!$task->isDone());
         $this->em->flush();
 
@@ -84,6 +110,22 @@ class TaskController extends AbstractController
     #[Route(path: '/tasks/{id}/delete', name: 'task_delete', methods: ['GET', 'POST', 'DELETE'])]
     public function deleteTaskAction(Task $task)
     {
+
+        /* --> Si l'utilisateur est admin et que l'auteur est anonyme, on peut supprimer */
+        if ($this->isGranted('ROLE_ADMIN') && $task->getUser()->getUsername() == 'anonymous') {
+            $this->em->remove($task);
+            $this->em->flush();
+
+            $this->addFlash('success', 'La tâche a bien été supprimée.');
+            return $this->redirectToRoute('task_list');
+        }
+
+        /* --> Si l'auteur n'est pas le même, on empêche la modification */
+        if (!$this->isAuthor($task)) {
+            $this->addFlash('error', 'Vous n\'êtes pas l\'auteur de cette tâche.');
+            return $this->redirectToRoute('task_list');
+        }
+
         $this->em->remove($task);
         $this->em->flush();
 
