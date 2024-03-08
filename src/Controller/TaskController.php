@@ -23,7 +23,7 @@ class TaskController extends AbstractController
     }
 
     /**
-     * Is the user is the author ?
+     * L'utilisateur est l'auteur ?
      */
     public function isAuthor(Task $task): bool
     {
