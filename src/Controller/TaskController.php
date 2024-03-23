@@ -66,16 +66,17 @@ class TaskController extends AbstractController
     #[Route(path: '/tasks/{id}/edit', name: 'task_edit', methods: ['GET', 'POST'])]
     public function editAction(Task $task, Request $request)
     {
+        /* Si l'auteur n'est pas le même, on empêche la modification */
+        if (!$this->isAuthor($task)) {
+            $this->addFlash('error', 'Vous n\'êtes pas l\'auteur de cette tâche.');
+            return $this->redirectToRoute('task_list');
+        }
+
         $form = $this->createForm(TaskType::class, $task);
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            /* Si l'auteur n'est pas le même, on empêche la modification */
-            if (!$this->isAuthor($task)) {
-                $this->addFlash('error', 'Vous n\'êtes pas l\'auteur de cette tâche.');
-                return $this->redirectToRoute('task_list');
-            }
 
             $this->em->flush();
 
@@ -102,7 +103,13 @@ class TaskController extends AbstractController
         $task->toggle(!$task->isDone());
         $this->em->flush();
 
-        $this->addFlash('success', sprintf('La tâche %s a bien été marquée comme faite.', $task->getTitle()));
+        if ($task->isDone()) {
+            $this->addFlash('success', sprintf('La tâche %s a bien été marquée comme faite.', $task->getTitle()));
+        }
+
+        if (!$task->isDone()) {
+            $this->addFlash('success', sprintf('La tâche %s a bien été marquée comme non terminée.', $task->getTitle()));
+        }
 
         return $this->redirectToRoute('task_list');
     }
