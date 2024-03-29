@@ -5,6 +5,7 @@ namespace App\Tests\Repository;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManager;
+use stdClass;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class UserRepositoryTest extends KernelTestCase
@@ -47,6 +48,7 @@ class UserRepositoryTest extends KernelTestCase
         $totoUser = $this->userRepository->findOneByUsername('toto');
         $this->userRepository->upgradePassword($totoUser, 'tata');
 
+        $this->assertInstanceOf(User::class, $totoUser);
         $this->assertEquals('tata', $totoUser->getPassword());
     }
 }
